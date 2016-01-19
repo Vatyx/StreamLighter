@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            #stream { width: 75%; float: left; }
+            #chat { width: 25%; float: right }
+        
+            body {
+                font-family: 'Raleway', sans-serif;
+                background-color: #5E35B1;
+                background: #5E35B1;
+                background-image: url('confectionary.png');
+                background-image: url('confectionary.png'), linear-gradient(#5E35B1, #5E35B1);
+                background: linear-gradient(
+                            to bottom,
+                            rgba(96,55,178,0.8),
+                            rgba(96,55,178,0.8)
+                          ),url('confectionary.png');
+            }
+
+            #title {
+                font-size: 90px;
+                text-align: center;
+
+                margin: 40px;
+                color: white;
+            }
+
+            #subtitle {
+                font-size: 45px;
+                text-align:center;
+                margin: 20px;
+                color: white;
+            }
+
+            #status {
+                font-size: 45px;
+                text-align:center;
+                margin: 30px;
+                color: white;
+            }
+
+            div.wrapper {
+                width: 600px;
+                height:100px;
+                margin: 0 auto;
+            }
+
+            .style-1 input[type="text"] {
+              padding: 10px;
+              border: solid 1px #dcdcdc;
+              transition: box-shadow 0.3s, border 0.3s;
+            }
+            .style-1 input[type="text"]:focus,
+            .style-1 input[type="text"].focus {
+              border: solid 1px #707070;
+              box-shadow: 0 0 5px 1px #969696;
+            }
+
+            input[type="text"] {
+              display: block;
+              margin: 0;
+              width: 100%;
+              font-family: sans-serif;
+              font-size: 18px;
+              appearance: none;
+              box-shadow: none;
+              border-radius: none;
+              width: 50%;
+              margin-left: 25%;
+              margin-bottom: 50px;
+            }
+            input[type="text"]:focus {
+              outline: none;
+              display: block;
+            }
+        </style>
+        
+        <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+        <script src="http://code.jquery.com/jquery-2.2.0.js"></script>
+        <script src="download.js"></script>
+    </head>
+
+    <body>
+        <div id="title">Streamlighter</div> 
+        <div id="subtitle">Enter a live twitch channel</div>
+        
+        <ul class="input-list style-1 clearfix" style="-webkit-padding-start: 0px">
+            <li>
+              <input type="text" placeholder="Channel" class="focus" id="streamname">
+            </li>
+        </ul>
+
+        <!--<section align="center">
+            <h1>My LiveStream</h1>
+        </section>
+        <section>
+            <div class="stream" align="center">
+                <object type="application/x-shockwave-flash" height="500" width="900" id="live_embed_player_flash" data="http://www.twitch.tv/widgets/live_embed_player.swf?channel=showdownsmash"
+                bgcolor="#000000">
+                    <param name="allowFullScreen" value="true" />
+                    <param name="allowScriptAccess" value="always" />
+                    <param name="allowNetworking" value="all" />
+                    <param name="movie" value="http://www.twitch.tv/widgets/live_embed_player.swf" />
+                    <param name="flashvars" value="hostname=www.twitch.tv&channel=showdownsmash&auto_play=true&start_volume=25" />
+                </object>
+
+                <iframe frameborder="0" scrolling="no" src="http://twitch.tv/showdownsmash/chat?popout="  height="500" width="350">
+                </iframe>
+            </div>
+        </section> -->
+
+        <script>
+        var streamname = "";
+        $("#streamname").keypress(function(event){
+            if(event.keyCode == 13){
+                // var what = $("#live_embed_player_flash").attr("data")
+                // console.log(what);
+                console.log("front end")
+                streamname = $('#streamname').val()
+                $("#streamname").after('<section> \
+                    <div class="stream" align="center"> \
+                        <object type="application/x-shockwave-flash" height="500" width="900" id="live_embed_player_flash" data="http://www.twitch.tv/widgets/live_embed_player.swf?channel='+ streamname +'" \
+                        bgcolor="#000000"> \
+                            <param name="allowFullScreen" value="true" /> \
+                            <param name="allowScriptAccess" value="always" /> \
+                            <param name="allowNetworking" value="all" /> \
+                            <param name="movie" value="http://www.twitch.tv/widgets/live_embed_player.swf" /> \
+                            <param name="flashvars" value="hostname=www.twitch.tv&channel='+ streamname +'&auto_play=true&start_volume=25" /> \
+                        </object> \
+                        <iframe frameborder="0" scrolling="no" src="http://twitch.tv/'+ streamname +'/chat?popout="  height="500" width="350"> \
+                        </iframe> \
+                    </div> \
+                </section> \
+                <div id="status">Recording stream! Looking for highlights</div>').hide().fadeIn(1000);
+                startingListening();
+            }
+        });
+        function startingListening()
+        {
+            console.log("got in here")
+            $.post("/startrecording", {name: streamname}, function()
+            {
+                console.log("got a response");
+                doListening();
+            });
+        }
+        var status = ""
+        function doListening()
+        {
+            $.get("/update", function(data)
+            {   
+                if(status != data.status)
+                {
+                    status = data.status;
+                    console.log("STATUS IS " + data.status)
+                }
+                if(data.status == "recording")
+                {
+                    $("#status").text("Recording stream! Looking for highlights");
+                }
+                else if(data.status == "highlight_start"){
+                    $("#status").text("Found highlight! Capturing...");
+                }
+                else if(data.status == "highlight_end"){
+                    $("#status").text("Highlight complete! Preparing download...");
+                }
+                else if(data.status == "download")
+                {
+                    $("#status").text("Download Ready!");
+                    $("body").append("<a href=/download download>Download the clip here</a><p>")
+                }
+
+                doListening();
+            });
+        }
+
+        </script>  
+    </body>
+</html>
