@@ -127,7 +127,6 @@ def twitch_chat():
                     #set_end = True
                     end = front + FIVE_SECONDS - DELAY
                     print ":twitch_chat END    =" + str(end) # printed end for debugging
-                    sys.stdout.flush()
                     set_start = False
                     print("~~~Highlight end~~~")
                     threading.Timer(7.0, create_highlight).start()
