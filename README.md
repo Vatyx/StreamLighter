@@ -9,3 +9,4 @@ We focused on twitch chat for this hack. Our metric for a highlight was seeing t
 We made a small web app to compliment this. The user can type in the address of a channel they are interested in, it will start looking at the stream to see if there is a highlight. If there is one, it will record it, and then make it available as a download.
 
 We tried this for Twitch, but it can be extended to be used for any live stream.
+
